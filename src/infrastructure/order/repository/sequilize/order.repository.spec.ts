@@ -39,7 +39,7 @@ describe("Order repository test", () => {
   it("should create a new order", async () => {
     const { orderModel, order, ordemItem } = await CreateNewOrder();
 
-    expect(orderModel.toJSON()).toStrictEqual({
+    expect(orderModel?.toJSON()).toStrictEqual({
       id: "123",
       customer_id: "123",
       total: order.total(),
@@ -59,28 +59,44 @@ describe("Order repository test", () => {
   it("should update a new order", async () => {
     const orderRepository = new OrderRepository();
 
-    const order1 = await CreateNewOrder();
-    const order2 = await CreateNewOrder(order1.order.id, "456", "456", false);
+    const { order, ordemItem } = await CreateNewOrder();
 
-    await orderRepository.update(order2.order);
+    let newItem = new OrderItem(
+      "999",
+      "new item (some product)",
+      ordemItem.price,
+      ordemItem.productId,
+      2
+    );
+    order.addItem(newItem);
+
+    await orderRepository.update(order);
 
     const orderModel = await OrderModel.findOne({
-      where: { id: order1.order.id },
+      where: { id: order.id },
       include: ["items"],
     });
 
-    expect(orderModel.toJSON()).toStrictEqual({
-      id: order1.order.id,
-      customer_id: order2.order.customerId,
-      total: order2.order.total(),
+    expect(orderModel?.toJSON()).toStrictEqual({
+      id: order.id,
+      customer_id: order.customerId,
+      total: order.total(),
       items: [
         {
-          id: order2.ordemItem.id,
-          name: order2.ordemItem.name,
-          price: order2.ordemItem.price,
-          quantity: order2.ordemItem.quantity,
-          order_id: order2.order.id,
-          product_id: order2.order.items[0].productId,
+          id: ordemItem.id,
+          name: ordemItem.name,
+          price: ordemItem.price,
+          quantity: ordemItem.quantity,
+          order_id: order.id,
+          product_id: ordemItem.productId,
+        },
+        {
+          id: newItem.id,
+          name: newItem.name,
+          price: newItem.price,
+          quantity: newItem.quantity,
+          order_id: order.id,
+          product_id: newItem.productId,
         },
       ],
     });

@@ -1,5 +1,5 @@
 # DDD-Typescript-Project-Example
-A Simple DDD Project example with Typescript
+A Simple DDD Project example with Typescript / Sequelize
 
 Steps:
 
